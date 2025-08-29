@@ -39,7 +39,7 @@
         "bcrypt": "^5.1.1",
         "speakeasy": "^2.0.0",
         "qrcode": "^1.5.3",
-        "zod": "^3.22.4",
+        "zod": "^4.1.5",
         "casbin": "^5.26.2",
         "helmet": "^7.1.0",
         "compression": "^1.7.4",
