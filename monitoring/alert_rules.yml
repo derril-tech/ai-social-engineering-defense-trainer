@@ -1,0 +1,209 @@
+groups:
+- name: ai-defense-trainer.rules
+  rules:
+  
+  # High-level application alerts
+  - alert: HighErrorRate
+    expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.1
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "High error rate detected"
+      description: "Error rate is {{ $value }} errors per second"
+
+  - alert: HighLatency
+    expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High latency detected"
+      description: "95th percentile latency is {{ $value }} seconds"
+
+  # Campaign and simulation alerts
+  - alert: CampaignDeliveryFailure
+    expr: rate(campaign_delivery_failures_total[5m]) > 0.05
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Campaign delivery failures detected"
+      description: "Campaign delivery failure rate is {{ $value }} per second"
+
+  - alert: HighPhishingClickRate
+    expr: phishing_click_rate > 0.25
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High phishing click rate detected"
+      description: "Phishing click rate is {{ $value }}% - may indicate campaign issues"
+
+  - alert: LowReportingRate
+    expr: phishing_report_rate < 0.05
+    for: 15m
+    labels:
+      severity: info
+    annotations:
+      summary: "Low phishing reporting rate"
+      description: "Phishing report rate is {{ $value }}% - users may need additional training"
+
+  # Infrastructure alerts
+  - alert: InstanceDown
+    expr: up == 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Instance {{ $labels.instance }} down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes"
+
+  - alert: HighCPUUsage
+    expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High CPU usage on {{ $labels.instance }}"
+      description: "CPU usage is {{ $value }}%"
+
+  - alert: HighMemoryUsage
+    expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High memory usage on {{ $labels.instance }}"
+      description: "Memory usage is {{ $value }}%"
+
+  - alert: DiskSpaceLow
+    expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 10
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Low disk space on {{ $labels.instance }}"
+      description: "Disk space is {{ $value }}% full"
+
+  # Database alerts
+  - alert: PostgreSQLDown
+    expr: pg_up == 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "PostgreSQL is down"
+      description: "PostgreSQL database is not responding"
+
+  - alert: PostgreSQLTooManyConnections
+    expr: sum(pg_stat_activity_count) > 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "PostgreSQL has too many connections"
+      description: "PostgreSQL has {{ $value }} active connections"
+
+  - alert: RedisDown
+    expr: redis_up == 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Redis is down"
+      description: "Redis cache is not responding"
+
+  - alert: ClickHouseDown
+    expr: clickhouse_up == 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "ClickHouse is down"
+      description: "ClickHouse analytics database is not responding"
+
+  # Message queue alerts
+  - alert: NATSDown
+    expr: nats_up == 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "NATS is down"
+      description: "NATS message queue is not responding"
+
+  - alert: HighMessageQueueLag
+    expr: nats_jetstream_consumer_num_pending > 1000
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High message queue lag"
+      description: "NATS consumer has {{ $value }} pending messages"
+
+  # Worker process alerts
+  - alert: WorkerProcessDown
+    expr: worker_process_up == 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Worker process {{ $labels.worker_type }} is down"
+      description: "{{ $labels.worker_type }} worker is not responding"
+
+  - alert: HighWorkerErrorRate
+    expr: rate(worker_errors_total[5m]) > 0.1
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High worker error rate"
+      description: "Worker {{ $labels.worker_type }} error rate is {{ $value }} per second"
+
+  # Security alerts
+  - alert: UnusualLoginActivity
+    expr: rate(auth_login_attempts_total{status="failed"}[5m]) > 10
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Unusual login activity detected"
+      description: "Failed login rate is {{ $value }} per second"
+
+  - alert: SuspiciousAPIActivity
+    expr: rate(api_requests_total{status="403"}[5m]) > 5
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Suspicious API activity detected"
+      description: "High rate of forbidden API requests: {{ $value }} per second"
+
+  # Business logic alerts
+  - alert: ContentGenerationFailure
+    expr: rate(content_generation_failures_total[5m]) > 0.1
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Content generation failures detected"
+      description: "AI content generation failure rate is {{ $value }} per second"
+
+  - alert: EmailDeliveryFailure
+    expr: rate(email_delivery_failures_total[5m]) > 0.05
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Email delivery failures detected"
+      description: "Email delivery failure rate is {{ $value }} per second"
+
+  - alert: TrainingCompletionRateLow
+    expr: training_completion_rate < 0.7
+    for: 30m
+    labels:
+      severity: info
+    annotations:
+      summary: "Low training completion rate"
+      description: "Training completion rate is {{ $value }}% - below target of 70%"

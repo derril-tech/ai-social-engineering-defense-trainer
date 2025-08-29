@@ -1,0 +1,123 @@
+name: Security Checks
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # Daily at 2 AM
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  dependency-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Audit npm packages
+      run: npm audit --audit-level=high
+    
+    - name: Check for known vulnerabilities
+      run: |
+        npx audit-ci --config audit-ci.json
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install Python dependencies
+      run: |
+        cd apps/workers
+        pip install -r requirements.txt
+        pip install safety
+    
+    - name: Check Python dependencies
+      run: |
+        cd apps/workers
+        safety check --json
+
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    
+    - name: CodeQL Analysis
+      uses: github/codeql-action/init@v2
+      with:
+        languages: javascript, python
+    
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v2
+    
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+
+  container-security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Build Docker images
+      run: |
+        docker build -t ai-defense/frontend ./apps/frontend
+        docker build -t ai-defense/backend ./apps/backend
+        docker build -t ai-defense/workers ./apps/workers
+    
+    - name: Scan Docker images
+      run: |
+        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+          -v $HOME/Library/Caches:/root/.cache/ \
+          aquasec/trivy image ai-defense/frontend
+        
+        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+          -v $HOME/Library/Caches:/root/.cache/ \
+          aquasec/trivy image ai-defense/backend
+        
+        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+          -v $HOME/Library/Caches:/root/.cache/ \
+          aquasec/trivy image ai-defense/workers
+
+  compliance-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Check license compliance
+      run: |
+        echo "Checking license compliance..."
+        # TODO: Add license scanning tool
+        # Ensure all dependencies have compatible licenses
+    
+    - name: GDPR compliance check
+      run: |
+        echo "Checking GDPR compliance patterns..."
+        # Check for proper data handling patterns
+        grep -r "personal.*data\|gdpr\|consent" --include="*.ts" --include="*.py" . || true
+    
+    - name: Security headers check
+      run: |
+        echo "Checking security headers configuration..."
+        # Verify security headers are properly configured
+        grep -r "helmet\|csp\|hsts" --include="*.ts" . || true

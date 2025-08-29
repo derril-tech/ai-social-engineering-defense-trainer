@@ -1,0 +1,85 @@
+version: 2
+updates:
+  # Enable version updates for npm (frontend)
+  - package-ecosystem: "npm"
+    directory: "/apps/frontend"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "security-team"
+    assignees:
+      - "lead-developer"
+    commit-message:
+      prefix: "frontend"
+      include: "scope"
+
+  # Enable version updates for npm (backend)
+  - package-ecosystem: "npm"
+    directory: "/apps/backend"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "security-team"
+    assignees:
+      - "lead-developer"
+    commit-message:
+      prefix: "backend"
+      include: "scope"
+
+  # Enable version updates for npm (root)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "security-team"
+    assignees:
+      - "lead-developer"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+
+  # Enable version updates for pip (workers)
+  - package-ecosystem: "pip"
+    directory: "/apps/workers"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "security-team"
+    assignees:
+      - "lead-developer"
+    commit-message:
+      prefix: "workers"
+      include: "scope"
+
+  # Enable version updates for Docker
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "security-team"
+    assignees:
+      - "lead-developer"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "security-team"
+    assignees:
+      - "lead-developer"
+    commit-message:
+      prefix: "ci"
+      include: "scope"

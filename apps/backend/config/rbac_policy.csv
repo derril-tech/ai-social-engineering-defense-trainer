@@ -1,0 +1,33 @@
+p, admin, campaigns, create
+p, admin, campaigns, read
+p, admin, campaigns, update
+p, admin, campaigns, delete
+p, admin, templates, create
+p, admin, templates, read
+p, admin, templates, update
+p, admin, templates, delete
+p, admin, users, create
+p, admin, users, read
+p, admin, users, update
+p, admin, users, delete
+p, admin, analytics, read
+p, admin, organizations, read
+p, admin, organizations, update
+
+p, manager, campaigns, create
+p, manager, campaigns, read
+p, manager, campaigns, update
+p, manager, templates, create
+p, manager, templates, read
+p, manager, templates, update
+p, manager, users, read
+p, manager, analytics, read
+p, manager, organizations, read
+
+p, analyst, campaigns, read
+p, analyst, templates, read
+p, analyst, users, read
+p, analyst, analytics, read
+
+p, user, campaigns, read
+p, user, templates, read

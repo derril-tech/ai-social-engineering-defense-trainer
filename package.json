@@ -1,0 +1,26 @@
+{
+    "name": "ai-social-engineering-defense-trainer",
+    "version": "0.1.0",
+    "private": true,
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "scripts": {
+        "dev": "turbo run dev",
+        "build": "turbo run build",
+        "test": "turbo run test",
+        "lint": "turbo run lint",
+        "clean": "turbo run clean",
+        "type-check": "turbo run type-check"
+    },
+    "devDependencies": {
+        "turbo": "^1.11.2",
+        "@types/node": "^20.10.5",
+        "typescript": "^5.3.3"
+    },
+    "engines": {
+        "node": ">=18.0.0",
+        "npm": ">=8.0.0"
+    }
+}
